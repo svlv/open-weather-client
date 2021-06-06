@@ -7,6 +7,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <math.h>
 
 #define DEFAULT_CITY "Minsk"
 #define DEFAULT_TOKEN "e5b292ae2f9dae5f29e11499c2d82ece"
@@ -45,7 +46,7 @@ float to_celsium(float kelvin) {
   return kelvin - 273.15;
 }
 
-int main() {
+int main(int argc, char *argv[]) {
   int sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock < 0) {
     fprintf(stderr, "Error creating a socket: %s\n", strerror(errno));
@@ -97,32 +98,41 @@ int main() {
     close(sock);
     return 1;
   }
+
+  close(sock);
   //printf("%s\n", response);
 
   char weather[256];
   memset(&weather, 0, sizeof(weather));
   get_value(response, "\"main\"", str_type, &weather);
-  printf("Weather: %s\n", weather);
 
   time_t sunrise = 0;
   get_value(response, "\"sunrise\"", time_type, &sunrise);
-  struct tm* sunrise_tm = localtime(&sunrise);
-  printf("Sunrise: %i:%iam\n", sunrise_tm->tm_hour, sunrise_tm->tm_min);
+  struct tm sunrise_tm = *localtime(&sunrise);
 
   time_t sunset = 0;
   get_value(response, "\"sunset\"", time_type, &sunset);
-  struct tm* sunset_tm = localtime(&sunset);
-  printf("Sunset: %i:%iam\n", sunset_tm->tm_hour, sunset_tm->tm_min);
+  struct tm sunset_tm = *localtime(&sunset);
 
   float temp = 0.0f;
   get_value(response, "\"temp\"", float_type, &temp);
-  printf("Temperature: %.2f℃\n", to_celsium(temp));
 
   float wind_speed = 0.0;
   get_value(response, "\"speed\"", float_type, &wind_speed);
-  printf("Wind speed: %.2f m/s\n", wind_speed);
 
-  close(sock);
+  if (argc == 1) {
+    printf("Weather: %s\n"
+           "Sunrise: %i:%iam\n"
+           "Sunset: %i:%iam\n"
+           "Temperature: %i℃\n"
+           "Wind speed: %i m/s\n",
+           weather,
+           sunrise_tm.tm_hour, sunrise_tm.tm_min,
+           sunset_tm.tm_hour, sunset_tm.tm_min,
+           (int)round(to_celsium(temp)),
+           (int)round(wind_speed));
+  }
+
   return 0;
 }
 
