@@ -15,7 +15,8 @@
 enum val_type {
   time_type = 1,
   float_type = 2,
-  str_type = 3
+  str_type = 3,
+  int_type
 };
 
 void get_value(const char* response, const char* key,
@@ -40,6 +41,27 @@ void get_value(const char* response, const char* key,
         break;
     }
   }
+}
+
+void replace(char* str, const char* key,
+             enum val_type type, void* value) {
+  char* beg = strstr(str, key);
+  if (beg == NULL) {
+    return;
+  }
+  char buff[256];
+  memset(buff, 0, sizeof(buff));
+  size_t sz = beg - str;
+  memcpy(buff, str, sz);
+  switch (type) {
+    case int_type:
+      sprintf(buff + sz, "%i", *(int*)value);
+      break;
+  }
+  beg += strlen(key) ;
+  memcpy(buff + strlen(buff), beg, strlen(beg));
+  memset(str, 0, strlen(str));
+  memcpy(str, buff, strlen(buff));
 }
 
 float to_celsium(float kelvin) {
@@ -100,7 +122,10 @@ int main(int argc, char *argv[]) {
   }
 
   close(sock);
-  //printf("%s\n", response);
+
+#ifdef DEBUG
+  printf("%s\n", response);
+#endif
 
   char weather[256];
   memset(&weather, 0, sizeof(weather));
@@ -131,6 +156,15 @@ int main(int argc, char *argv[]) {
            sunset_tm.tm_hour, sunset_tm.tm_min,
            (int)round(to_celsium(temp)),
            (int)round(wind_speed));
+  } else if (argc == 2) {
+    char result[256];
+    memset(result, 0, sizeof(result));
+    strcpy(result, argv[1]);
+    int tmp = (int)round(to_celsium(temp));
+    replace(result, "%temp", int_type, &tmp);
+    int wind = (int)round(wind_speed);
+    replace(result, "%wind", int_type, &wind);
+    printf("%s\n", result);
   }
 
   return 0;
