@@ -1,10 +1,45 @@
-all: open-weather-client
+CC     = gcc
+CFLAGS = -Wall -Wextra
 
-open-weather-client: open_weather_client.o
-	gcc -o open-weather-client open_weather_client.o -lm
+SRCS = open_weather_client.c
+OBJS = $(SRCS:.c=.o)
+EXE  = open-weather-client
 
-open_weather_client.o: open_weather_client.c
-	gcc -c open_weather_client.c
+DBGDIR = debug
+DBGEXE = $(DBGDIR)/$(EXE)
+DBGOBJS = $(addprefix $(DBGDIR)/, $(OBJS))
+DBGCFLAGS = -g -O0 -DDEBUG -lm
+
+RELDIR = release
+RELEXE = $(RELDIR)/$(EXE)
+RELOBJS = $(addprefix $(RELDIR)/, $(OBJS))
+RELCFLAGS = -O3 -DNDEBUG -lm
+
+.PHONY: all clean debug prep release remake
+
+all: prep release
+
+debug: $(DBGEXE)
+
+$(DBGEXE): $(DBGOBJS)
+	$(CC) $(CFLAGS) $(DBGCFLAGS) -o $(DBGEXE) $^
+
+$(DBGDIR)/%.o: %.c
+	$(CC) -c $(CFLAGS) $(DBGCFLAGS) -o $@ $<
+
+release: $(RELEXE)
+
+$(RELEXE): $(RELOBJS)
+	$(CC) $(CFLAGS) $(RELCFLAGS) -o $(RELEXE) $^
+
+$(RELDIR)/%.o: %.c
+	$(CC) -c $(CFLAGS) $(RELCFLAGS) -o $@ $<
+
+prep:
+	@mkdir -p $(DBGDIR) $(RELDIR)
+
+remake: clean all
 
 clean:
-	rm open_weather_client.o open_weather_client
+	rm -f $(RELEXE) $(RELOBJS) $(DBGEXE) $(DBGOBJS)
+

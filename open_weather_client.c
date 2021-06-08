@@ -8,7 +8,8 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <math.h>
-
+#include <wchar.h>
+#include <locale.h>
 #define DEFAULT_CITY "Minsk"
 #define DEFAULT_TOKEN "e5b292ae2f9dae5f29e11499c2d82ece"
 
@@ -16,7 +17,8 @@ enum val_type {
   time_type = 1,
   float_type = 2,
   str_type = 3,
-  int_type
+  int_type,
+  wchar_type
 };
 
 void get_value(const char* response, const char* key,
@@ -39,33 +41,65 @@ void get_value(const char* response, const char* key,
       case str_type:
         memcpy(result, value + 1, strlen(value) - 2);
         break;
+      case int_type:
+        *(int*)result = atoi(value);
+      default:
+        break;
     }
   }
 }
 
-void replace(char* str, const char* key,
+void replace(wchar_t* str, const wchar_t* key,
              enum val_type type, void* value) {
-  char* beg = strstr(str, key);
+  wchar_t* beg = wcsstr(str, key);
   if (beg == NULL) {
     return;
   }
-  char buff[256];
-  memset(buff, 0, sizeof(buff));
+  wchar_t buff[256];
+  wmemset(buff, 0, 256);
   size_t sz = beg - str;
-  memcpy(buff, str, sz);
+  wmemcpy(buff, str, sz);
   switch (type) {
     case int_type:
-      sprintf(buff + sz, "%i", *(int*)value);
+      swprintf(buff + sz, 256, L"%i", *(int*)value);
+      break;
+    case wchar_type:
+      swprintf(buff + sz, 256, L"%lc", *(wchar_t*)value);
+      break;
+    case time_type:
+    case float_type:
+    case str_type:
+    default:
       break;
   }
-  beg += strlen(key) ;
-  memcpy(buff + strlen(buff), beg, strlen(beg));
-  memset(str, 0, strlen(str));
-  memcpy(str, buff, strlen(buff));
+  beg += wcslen(key) ;
+  wmemcpy(buff + wcslen(buff), beg, wcslen(beg));
+  wmemset(str, 0, wcslen(str));
+  wmemcpy(str, buff, wcslen(buff));
 }
 
 float to_celsium(float kelvin) {
   return kelvin - 273.15;
+}
+
+wchar_t get_wind_dir_icon(int deg) {
+  if (deg >= 337)
+    return L'↓';
+  else if (deg >= 293)
+    return L'↘';
+  else if (deg >= 247)
+    return L'→';
+  else if (deg >= 203)
+    return L'↗';
+  else if (deg >= 157)
+    return L'↑';
+  else if (deg >= 113)
+    return L'↖';
+  else if (deg >= 67)
+    return L'←';
+  else if (deg >= 23)
+    return L'↙';
+  return L'↓';
 }
 
 int main(int argc, char *argv[]) {
@@ -124,7 +158,7 @@ int main(int argc, char *argv[]) {
   close(sock);
 
 #ifdef DEBUG
-  printf("%s\n", response);
+  //printf("%s\n", response);
 #endif
 
   char weather[256];
@@ -145,6 +179,9 @@ int main(int argc, char *argv[]) {
   float wind_speed = 0.0;
   get_value(response, "\"speed\"", float_type, &wind_speed);
 
+  int deg = 0;
+  get_value(response, "\"deg\"", int_type, &deg);
+
   if (argc == 1) {
     printf("Weather: %s\n"
            "Sunrise: %i:%iam\n"
@@ -157,16 +194,19 @@ int main(int argc, char *argv[]) {
            (int)round(to_celsium(temp)),
            (int)round(wind_speed));
   } else if (argc == 2) {
-    char result[256];
-    memset(result, 0, sizeof(result));
-    strcpy(result, argv[1]);
-    int tmp = (int)round(to_celsium(temp));
-    replace(result, "%temp", int_type, &tmp);
-    int wind = (int)round(wind_speed);
-    replace(result, "%wind", int_type, &wind);
-    printf("%s\n", result);
-  }
+    setlocale(LC_ALL, "en_US.UTF-8");
+    wchar_t result[256];
+    wmemset(result, 0, 256);
+    mbstowcs(result, argv[1], 256);
 
+    int tmp = (int)round(to_celsium(temp));
+    replace(result, L"%temp", int_type, &tmp);
+    wchar_t wind_dir_icon = get_wind_dir_icon(deg);
+    replace(result, L"%winddiricon", wchar_type, &wind_dir_icon);
+    int wind = (int)round(wind_speed);
+    replace(result, L"%wind", int_type, &wind);
+    wprintf(L"%ls\n", result);
+  }
   return 0;
 }
 
