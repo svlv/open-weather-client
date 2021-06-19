@@ -10,6 +10,7 @@
 #include <math.h>
 #include <wchar.h>
 #include <locale.h>
+
 #define DEFAULT_CITY "Minsk"
 #define DEFAULT_TOKEN "e5b292ae2f9dae5f29e11499c2d82ece"
 
@@ -102,6 +103,25 @@ wchar_t get_wind_dir_icon(int deg) {
   return L'↓';
 }
 
+wchar_t get_weaither_icon(int id)
+{
+  if (id >= 200 && id <= 232)
+    return L'🌩';
+  else if (id >=300 && id <= 321)
+    return L'🌧';
+  else if (id >= 500 && id <= 531)
+    return L'🌧';
+  else if (id >= 600 && id <= 622)
+    return L'❄️';
+  else if (id >= 700 && id <= 781)
+    return L'🌫️';
+  else if (id == 800)
+    return L'☀️';
+  else if (id >= 801 && id <= 804)
+    return L'☁️';
+  return L'';
+}
+
 int main(int argc, char *argv[]) {
   int sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock < 0) {
@@ -158,7 +178,7 @@ int main(int argc, char *argv[]) {
   close(sock);
 
 #ifdef DEBUG
-  //printf("%s\n", response);
+  printf("%s\n", response);
 #endif
 
   char weather[256];
