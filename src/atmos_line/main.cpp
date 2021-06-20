@@ -1,4 +1,4 @@
-#include "atmos.hpp"
+#include "atmos/atmos.hpp"
 #include <iostream>
 #include <clocale>
 

@@ -1,17 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
+project(atmos)
 
-project(open-weather-client)
-
-set(THREADS_PREFER_PTHREAD_FLAG ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-find_package(Threads REQUIRED)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-include_directories("src")
+add_subdirectory(src/atmos)
+add_subdirectory(src/atmos_line)
 
-file(GLOB_RECURSE SRC "src/*.cpp")
-file(GLOB_RECURSE INC "src/*.hpp")
-add_executable(${PROJECT_NAME} ${SRC})
-
-target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
