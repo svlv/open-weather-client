@@ -78,8 +78,8 @@ data::sys_t data_parser::get_sys() const
 {
   const auto& sys = _pt.get_child("sys");
   return {
-    sys.get<int>("type"),
-    sys.get<int>("id"),
+    //sys.get<int>("type"),
+    //sys.get<int>("id"),
     sys.get<std::string>("country"),
     sys.get<int>("sunrise"),
     sys.get<int>("sunset")

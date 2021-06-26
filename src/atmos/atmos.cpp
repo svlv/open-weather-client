@@ -3,7 +3,6 @@
 #include "data_parser.hpp"
 #include "utils.hpp"
 #include <cstdlib>
-
 std::string_view env_token = std::getenv("OW_TOKEN");
 std::string_view env_city = std::getenv("OW_CITY");
 

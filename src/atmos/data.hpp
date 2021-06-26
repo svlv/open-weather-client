@@ -41,8 +41,8 @@ struct data
   clouds_t clouds;
   int dt;
   struct sys_t {
-    int type;
-    int id;
+//    int type;
+//    int id;
     std::string country;
     int sunrise;
     int sunset;
