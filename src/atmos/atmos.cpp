@@ -3,13 +3,13 @@
 #include "data_parser.hpp"
 #include "utils.hpp"
 #include <cstdlib>
-std::string_view env_token = std::getenv("OW_TOKEN");
-std::string_view env_city = std::getenv("OW_CITY");
 
 data get_current_weather()
 {
-  auto target = make_target(env_city.empty() ? city : env_city,
-                            env_token.empty() ? token : env_token);
+  char* env_token = std::getenv("OW_TOKEN");
+  char* env_city = std::getenv("OW_CITY");
+  auto target = make_target(env_city ? env_city : city,
+                            env_token ? env_token : token);
   auto request = make_request(target, host);
   http_client client;
   client.connect(host, port);
