@@ -1,40 +1,26 @@
 #include "utils.hpp"
 #include "config.hpp"
 #include <boost/beast/version.hpp>
+#include "query_string.hpp"
 
-std::string make_target(std::string_view city, std::string_view token)
-{
-  std::ostringstream os;
-  os << target << "?q=" << city << "&appid=" << token;
-  return os.str();
-}
-
-http::request<http::string_body> make_request(std::string_view target, std::string_view host)
-{
-  http::request<http::string_body> req{http::verb::get, target, version};
-  req.set(boost::beast::http::field::host, host);
-  req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
-  return req;
-}
-
-std::wstring_view get_wind_dir_icon(int deg) {
+wchar_t get_wind_dir_icon(int deg) {
   if (deg >= 337)
-    return L"↓";
+    return L'↓';
   else if (deg >= 293)
-    return L"↘";
+    return L'↘';
   else if (deg >= 247)
-    return L"→";
+    return L'→';
   else if (deg >= 203)
-    return L"↗";
+    return L'↗';
   else if (deg >= 157)
-    return L"↑";
+    return L'↑';
   else if (deg >= 113)
-    return L"↖";
+    return L'↖';
   else if (deg >= 67)
-    return L"←";
+    return L'←';
   else if (deg >= 23)
-    return L"↙";
-  return L"↓";
+    return L'↙';
+  return L'↓';
 }
 
 std::wstring_view get_weather_icon(int id)
