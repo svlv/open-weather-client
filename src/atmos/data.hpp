@@ -53,4 +53,3 @@ struct data
   std::string name;
   int cod;
 };
-

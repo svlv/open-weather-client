@@ -1,6 +1,6 @@
 #pragma once
+//#define BOOST_BEAST_USE_STD_STRING_VIEW
 
 #include "data.hpp"
-#include "utils.hpp"
 
 data get_current_weather();

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <boost/property_tree/ptree.hpp>
 #include "data.hpp"
 
@@ -25,4 +27,3 @@ class data_parser
   private:
     boost::property_tree::ptree _pt;
 };
-

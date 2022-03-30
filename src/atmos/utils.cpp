@@ -1,20 +1,18 @@
 #include "utils.hpp"
+#include "config.hpp"
 #include <boost/beast/version.hpp>
 
 std::string make_target(std::string_view city, std::string_view token)
 {
   std::ostringstream os;
-  os << TARGET << "?q=" << city << "&appid=" << token;
+  os << target << "?q=" << city << "&appid=" << token;
   return os.str();
 }
 
 http::request<http::string_body> make_request(std::string_view target, std::string_view host)
 {
-  boost::string_view boost_target(target.data(), target.size());
-  boost::string_view boost_host(host.data(), host.size());
-  http::request<http::string_body> req{http::verb::get, boost_target, version};
-  boost::string_view str = http::to_string(http::field::host);
-  req.set(boost::beast::http::field::host, boost_host);
+  http::request<http::string_body> req{http::verb::get, target, version};
+  req.set(boost::beast::http::field::host, host);
   req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
   return req;
 }
@@ -57,4 +55,3 @@ std::wstring_view get_weather_icon(int id)
     return L"☁️";
   return L"";
 }
-

@@ -16,4 +16,3 @@ class http_client
     boost::asio::io_context _ioc;
     boost::beast::tcp_stream _stream;
 };
-

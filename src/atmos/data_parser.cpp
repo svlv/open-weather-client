@@ -124,4 +124,3 @@ data data_parser::parse() const
     get_cod()
   };
 }
-

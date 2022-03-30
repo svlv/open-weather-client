@@ -1,6 +1,5 @@
 #include "http_client.hpp"
 
-
 http_client::http_client() : _stream(_ioc) {}
 
 void http_client::connect(std::string_view host, std::string_view port)
@@ -22,4 +21,3 @@ std::string http_client::read()
   http::read(_stream, buffer, res);
   return res.body();
 }
-

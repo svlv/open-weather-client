@@ -3,6 +3,7 @@
 #include "data_parser.hpp"
 #include "utils.hpp"
 #include <cstdlib>
+#include "config.hpp"
 
 data get_current_weather()
 {
@@ -18,4 +19,3 @@ data get_current_weather()
   data_parser parser(response);
   return parser.parse();
 }
-

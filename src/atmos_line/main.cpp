@@ -1,4 +1,6 @@
 #include "atmos/atmos.hpp"
+#include "atmos/config.hpp"
+#include "atmos/utils.hpp"
 #include <iostream>
 #include <clocale>
 
@@ -16,4 +18,3 @@ int main()
 
   return 0;
 }
-
