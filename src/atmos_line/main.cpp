@@ -9,6 +9,8 @@
 #include<boost/program_options/parsers.hpp>
 #include<boost/program_options/variables_map.hpp>
 
+#include <time.h>
+
 namespace po = boost::program_options;
 
 int main(int argc, char* argv[])
@@ -27,7 +29,7 @@ int main(int argc, char* argv[])
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
-  po::notify(vm);    
+  po::notify(vm);
 
   if (vm.count("get-current-weather"))
   {
@@ -36,15 +38,35 @@ int main(int argc, char* argv[])
     const auto cels = to_int(to_celsium(data.main.temp));
     const auto wind_speed = to_int(data.wind.speed);
 
-    printf("%s %d°C %dm/s", data.weather[0].description, cels, wind_speed);
+    printf("%s %d°C %dm/s", data.weather[0].main.c_str(), cels, wind_speed);
   }
 
   if (vm.count("get-forecast"))
   {
     auto data = get_5_day_3_hour_forecast(lat, lon, token);
+    int day = -1;
     for (const auto& elem : data.list)
     {
-      std::cout <<  elem.dt_txt << " " << to_int(to_celsium(elem.main.temp)) << std::endl;
+
+      time_t sec = (time_t)elem.dt;
+      struct tm* timeinfo = localtime(&sec);
+
+      if (day == -1) {
+        day = timeinfo->tm_mday;
+      }
+      else if (day != timeinfo->tm_mday) {
+        printf("\n");
+        day = timeinfo->tm_mday;
+      }
+
+      char buff[64];
+      strftime(buff, sizeof buff, "%d %b %H.%M", timeinfo);
+
+      const auto cels = to_int(to_celsium(elem.main.temp));
+      const auto wind_speed = to_int(elem.wind.speed);
+
+      printf("%s %s %d°C %dm/s\n", buff, elem.weather[0].main.c_str(), cels, wind_speed);
+
     }
   }
 

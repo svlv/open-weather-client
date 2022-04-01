@@ -11,4 +11,7 @@ find_package(Threads REQUIRED)
 file(GLOB_RECURSE SRC "*.cpp")
 add_library(${PROJECT_NAME} SHARED ${SRC})
 
+find_package(Boost REQUIRED)
+target_include_directories(${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIR})
+
 target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)

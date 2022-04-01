@@ -16,7 +16,7 @@ class data_parser
     std::string get_base() const;
     data::main_t get_main() const;
     int get_visibility() const;
-    wind_t get_wind() const;
+    //wind_t get_wind(const boost::property_tree::ptree _pt) const;
     clouds_t get_clouds() const;
     int get_dt() const;
     data::sys_t get_sys() const;

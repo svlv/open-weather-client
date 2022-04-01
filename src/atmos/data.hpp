@@ -4,6 +4,9 @@
 #include <string>
 #include <vector>
 
+#include <boost/property_tree/ptree.hpp>
+namespace pt = boost::property_tree;
+
 struct weather_t
 {
   int id;
@@ -19,6 +22,9 @@ struct clouds_t
 
 struct wind_t
 {
+  //wind_t() = default;
+  //wind_t(const pt::ptree& tree);
+
   double speed;
   int deg;
   std::optional<double> gust;
@@ -102,7 +108,7 @@ struct data
 
 struct forecast_data
 {
-  int cnt; // A number of timestamps returned in the API response
+  int cnt; // A number of timestamps
   struct forecast_t
   {
     int dt;
