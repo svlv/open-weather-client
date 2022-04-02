@@ -47,7 +47,6 @@ int main(int argc, char* argv[])
     int day = -1;
     for (const auto& elem : data.list)
     {
-
       time_t sec = (time_t)elem.dt;
       struct tm* timeinfo = localtime(&sec);
 
@@ -55,17 +54,20 @@ int main(int argc, char* argv[])
         day = timeinfo->tm_mday;
       }
       else if (day != timeinfo->tm_mday) {
-        printf("\n");
+        char date[16];
+        strftime(date, sizeof date, "%d %b", timeinfo);
+        //printf("<span foreground='#077b8a'>%s</span>\n", date);
+        printf("\033[38;5;1m%s\033[0m\n", date);
         day = timeinfo->tm_mday;
       }
 
-      char buff[64];
-      strftime(buff, sizeof buff, "%d %b %H.%M", timeinfo);
+      char time[16];
+      strftime(time, sizeof time, "%H.%M", timeinfo);
 
       const auto cels = to_int(to_celsium(elem.main.temp));
       const auto wind_speed = to_int(elem.wind.speed);
 
-      printf("%s %s %d°C %dm/s\n", buff, elem.weather[0].main.c_str(), cels, wind_speed);
+      printf("%s %-6s %3d°C %2dm/s\n", time, elem.weather[0].main.c_str(), cels, wind_speed);
 
     }
   }
