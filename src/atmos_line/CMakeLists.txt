@@ -2,9 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(atmos-line)
 
-# Include boost
 find_package(Boost COMPONENTS program_options REQUIRED)
-# target_include_directories(${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIR})
 
 include_directories("${CMAKE_SOURCE_DIR}/src")
 

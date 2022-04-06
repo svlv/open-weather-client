@@ -1,9 +1,7 @@
 #pragma once
 
 #include <cmath>
-#include <boost/beast/http.hpp>
-
-namespace http = boost::beast::http;
+#include <string_view>
 
 static inline double to_celsium(double kelvin) {
   return kelvin - 273.15;

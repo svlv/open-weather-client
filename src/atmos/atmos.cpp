@@ -1,13 +1,10 @@
 #include "atmos.hpp"
 #include "http_client.hpp"
-#include "data_parser.hpp"
-#include "utils.hpp"
-#include <cstdlib>
-#include "config.hpp"
+#include "deserialize.hpp"
 #include "query_string.hpp"
+
 #include <cstdio>
 #include <boost/beast/version.hpp>
-#include <iostream>
 
 constexpr std::string_view HOST = "api.openweathermap.org";
 constexpr std::string_view PORT = "80";
@@ -28,14 +25,14 @@ http::request<http::string_body> make_request(std::string_view path, std::string
   sprintf(full_path, "%s?%s", path.data(), queries.to_string().c_str());
 
   http::request<http::string_body> req{http::verb::get, full_path, 10};
-  req.set(boost::beast::http::field::host, host);
+  req.set(boost::beast::http::field::host, HOST);
   req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
 
   return req;
 }
 } // namespace
 
-data get_current_weather(double lat, double lon, std::string_view token)
+weather_data get_current_weather(double lat, double lon, std::string_view token)
 {
   http_client client;
   client.connect(HOST, PORT);
@@ -43,8 +40,7 @@ data get_current_weather(double lat, double lon, std::string_view token)
   const std::string_view path = "/data/2.5/weather";
   client.write(make_request(path, token, lat, lon));
 
-  data_parser parser(client.read());
-  return parser.parse();
+  return deserialize<weather_data>(client.read());
 }
 
 forecast_data get_5_day_3_hour_forecast(double lat, double lon, std::string_view token)
@@ -55,6 +51,5 @@ forecast_data get_5_day_3_hour_forecast(double lat, double lon, std::string_view
   const std::string_view path = "/data/2.5/forecast";
   client.write(make_request(path, token, lat, lon));
 
-  data_parser parser(client.read());
-  return parser.parse_forecast();
+  return deserialize<forecast_data>(client.read());
 }

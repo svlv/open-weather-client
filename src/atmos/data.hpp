@@ -4,9 +4,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/property_tree/ptree.hpp>
-namespace pt = boost::property_tree;
-
 struct weather_t
 {
   int id;
@@ -27,15 +24,13 @@ struct wind_t
   std::optional<double> gust;
 };
 
-struct data
+struct weather_data
 {
   struct coord_t {
     double lon;
     double lat;
   };
-  coord_t coord;
-  std::vector<weather_t> weather;
-  std::string base;
+
   struct main_t {
     double temp;
     double feels_like;
@@ -44,16 +39,21 @@ struct data
     int pressure;
     int humidity;
   };
-  main_t main;
-  int visibility;
-  wind_t wind;
-  clouds_t clouds;
-  int dt;
+
   struct sys_t {
     std::string country;
     int sunrise;
     int sunset;
   };
+
+  coord_t coord;
+  std::vector<weather_t> weather;
+  std::string base;
+  main_t main;
+  int visibility;
+  wind_t wind;
+  clouds_t clouds;
+  int dt;
   sys_t sys;
   int timezone;
   int id;
@@ -63,11 +63,8 @@ struct data
 
 struct forecast_data
 {
-  int cnt; // A number of timestamps
   struct forecast_t
   {
-    int dt;
-    std::string dt_txt;
     struct main_t {
       double temp;
       double feels_like;
@@ -78,6 +75,9 @@ struct forecast_data
       int grnd_level;
       int humidity;
     };
+
+    int dt;
+    std::string dt_txt;
     main_t main;
     std::vector<weather_t> weather;
     clouds_t clouds;
@@ -85,5 +85,7 @@ struct forecast_data
     int visibility;
     double pop;
   };
+
+  int cnt; // A number of timestamps
   std::vector<forecast_t> list;
 };

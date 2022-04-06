@@ -1,7 +1,4 @@
 #include "utils.hpp"
-#include "config.hpp"
-#include <boost/beast/version.hpp>
-#include "query_string.hpp"
 
 wchar_t get_wind_dir_icon(int deg) {
   if (deg >= 337)

@@ -1,9 +1,10 @@
-#include "data_parser.hpp"
-#include "utils.hpp"
-#define BOOST_BIND_GLOBAL_PLACEHOLDERS
-#include <boost/property_tree/json_parser.hpp>
+#pragma once
 
-template <class T> T deserialize(const boost::property_tree::ptree& pt);
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include "data.hpp"
+
+template <class T, class U> T deserialize(const U& data);
 
 template <>
 wind_t deserialize(const boost::property_tree::ptree& pt)
@@ -86,7 +87,7 @@ std::vector<forecast_data::forecast_t> deserialize(const boost::property_tree::p
 }
 
 template <>
-data::coord_t deserialize(const boost::property_tree::ptree& pt)
+weather_data::coord_t deserialize(const boost::property_tree::ptree& pt)
 {
   return {
     pt.get<double>("lon"),
@@ -95,7 +96,7 @@ data::coord_t deserialize(const boost::property_tree::ptree& pt)
 }
 
 template <>
-data::main_t deserialize(const boost::property_tree::ptree& pt)
+weather_data::main_t deserialize(const boost::property_tree::ptree& pt)
 {
   return {
     pt.get<double>("temp"),
@@ -108,7 +109,7 @@ data::main_t deserialize(const boost::property_tree::ptree& pt)
 }
 
 template <>
-data::sys_t deserialize(const boost::property_tree::ptree& pt)
+weather_data::sys_t deserialize(const boost::property_tree::ptree& pt)
 {
   return {
     pt.get<std::string>("country"),
@@ -117,35 +118,53 @@ data::sys_t deserialize(const boost::property_tree::ptree& pt)
   };
 }
 
-data_parser::data_parser(const std::string& data)
+template <>
+weather_data deserialize(const boost::property_tree::ptree& pt)
+{
+  return {
+    deserialize<weather_data::coord_t>(pt.get_child("coord")),
+    deserialize<std::vector<weather_t>>(pt.get_child("weather")),
+    pt.get<std::string>("base"),
+    deserialize<weather_data::main_t>(pt.get_child("main")),
+    pt.get<int>("visibility"),
+    deserialize<wind_t>(pt.get_child("wind")),
+    deserialize<clouds_t>(pt.get_child("clouds")),
+    pt.get<int>("dt"),
+    deserialize<weather_data::sys_t>(pt.get_child("sys")),
+    pt.get<int>("timezone"),
+    pt.get<int>("id"),
+    pt.get<std::string>("name"),
+    pt.get<int>("cod")
+  };
+}
+
+template <>
+forecast_data deserialize(const boost::property_tree::ptree& pt)
+{
+  return {
+    pt.get<int>("cnt"),
+    deserialize<std::vector<forecast_data::forecast_t>>(pt.get_child("list"))
+  };
+}
+
+template <>
+weather_data deserialize(const std::string& data)
 {
   std::stringstream ss(data);
-  boost::property_tree::read_json(ss, _pt);
+
+  boost::property_tree::ptree pt;
+  boost::property_tree::read_json(ss, pt);
+
+  return deserialize<weather_data>(pt);
 }
 
-data data_parser::parse() const
+template <>
+forecast_data deserialize(const std::string& data)
 {
-  return {
-    deserialize<data::coord_t>(_pt.get_child("coord")),
-    deserialize<std::vector<weather_t>>(_pt.get_child("weather")),
-    _pt.get<std::string>("base"),
-    deserialize<data::main_t>(_pt.get_child("main")),
-    _pt.get<int>("visibility"),
-    deserialize<wind_t>(_pt.get_child("wind")),
-    deserialize<clouds_t>(_pt.get_child("clouds")),
-    _pt.get<int>("dt"),
-    deserialize<data::sys_t>(_pt.get_child("sys")),
-    _pt.get<int>("timezone"),
-    _pt.get<int>("id"),
-    _pt.get<std::string>("name"),
-    _pt.get<int>("cod")
-  };
-}
+  std::stringstream ss(data);
 
-forecast_data data_parser::parse_forecast() const
-{
-  return {
-    _pt.get<int>("cnt"),
-    deserialize<std::vector<forecast_data::forecast_t>>(_pt.get_child("list"))
-  };
+  boost::property_tree::ptree pt;
+  boost::property_tree::read_json(ss, pt);
+
+  return deserialize<forecast_data>(pt);
 }
