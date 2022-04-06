@@ -15,3 +15,5 @@ find_package(Boost REQUIRED)
 target_include_directories(${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIR})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
+
+install(TARGETS ${PROJECT_NAME})
