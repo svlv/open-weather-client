@@ -1,13 +1,9 @@
 #include "atmos/atmos.hpp"
-//#include "atmos/config.hpp"
 #include "atmos/utils.hpp"
-#include <iostream>
-#include <clocale>
-#include <string_view>
 
-#include<boost/program_options/options_description.hpp>
-#include<boost/program_options/parsers.hpp>
-#include<boost/program_options/variables_map.hpp>
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/parsers.hpp>
+#include <boost/program_options/variables_map.hpp>
 
 #include <time.h>
 
