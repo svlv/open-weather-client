@@ -5,6 +5,9 @@
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include <iostream>
+#include <iomanip>
+
 #include <time.h>
 
 namespace po = boost::program_options;
@@ -17,15 +20,26 @@ int main(int argc, char* argv[])
 
   po::options_description desc("Atmos usage");
   desc.add_options()
-      ("lat", po::value<double>(&lat)->default_value(51.5072), "Geographical coordinate - latitude")
-      ("lon", po::value<double>(&lon)->default_value(0.1276), "Geographical coordinate - longitude")
-      ("token", po::value<std::string>(&token)->default_value("0dcf521f731dd46db31533ed4494c04c"), "Your unique API key")
+      ("help", "Produce help message")
       ("get-current-weather", "Get current weather for your location on Earth (London is default)")
-      ("get-forecast", "Get 5 day/3 hour forecast");
+      ("get-forecast", "Get 5 day/3 hour forecast")
+      ("lat", po::value<double>(&lat)->default_value(51.5072, "51.5072"), "Geographical coordinate - latitude")
+      ("lon", po::value<double>(&lon)->default_value(0.1276, "0.1276"), "Geographical coordinate - longitude")
+      ("token", po::value<std::string>(&token)->default_value("0dcf521f731dd46db31533ed4494c04c"), "Your unique API key");
 
   po::variables_map vm;
-  po::store(po::parse_command_line(argc, argv, desc), vm);
+  try {
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+  } catch(const po::unknown_option& e) {
+    fprintf(stderr, "Error: %s\n", e.what());
+    return 1;
+  }
   po::notify(vm);
+
+  if (vm.count("help")) 
+  {
+    std::cout << std::setprecision(2) << desc << std::endl;
+  }
 
   if (vm.count("get-current-weather"))
   {
