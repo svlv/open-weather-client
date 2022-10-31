@@ -22,6 +22,7 @@ int main(int argc, char* argv[])
   desc.add_options()
       ("help", "Produce help message")
       ("get-current-weather", "Get current weather for your location on Earth (London is default)")
+      ("get-current-weather-with-pollution", "Get current weather and air pollution")
       ("get-forecast", "Get 5 day/3 hour forecast")
       ("lat", po::value<double>(&lat)->default_value(51.5072, "51.5072"), "Geographical coordinate - latitude")
       ("lon", po::value<double>(&lon)->default_value(0.1276, "0.1276"), "Geographical coordinate - longitude")
@@ -49,6 +50,18 @@ int main(int argc, char* argv[])
     const auto wind_speed = to_int(data.wind.speed);
 
     printf("%s %d°C %dm/s", data.weather[0].main.c_str(), cels, wind_speed);
+  }
+
+  if (vm.count("get-current-weather-with-pollution"))
+  {
+    auto weather = get_current_weather(lat, lon, token);
+    const auto cels = to_int(to_celsium(weather.main.temp));
+    const auto wind_speed = to_int(weather.wind.speed);
+
+    auto air_pollution = get_air_pollution(lat, lon, token);
+    const auto aqi = air_pollution.list[0].main.aqi;
+
+    printf("%s %d°C %dm/s %s", weather.weather[0].main.c_str(), cels, wind_speed, get_aqi_name(aqi).data());
   }
 
   if (vm.count("get-forecast"))

@@ -89,3 +89,36 @@ struct forecast_data
   int cnt; // A number of timestamps
   std::vector<forecast_t> list;
 };
+
+struct air_pollution_data
+{
+  struct coord_t {
+    double lon;
+    double lat;
+  };
+
+  struct air_pollution_t {
+
+    struct main_t {
+      int aqi;
+    };
+
+    struct components_t {
+      double co;
+      double no;
+      double no2;
+      double o3;
+      double so2;
+      double pm2_5;
+      double pm10;
+      double nh3;
+    };
+
+    int dt;
+    main_t main;
+    components_t components;
+  };
+
+  coord_t coord;
+  std::vector<air_pollution_t> list;
+};

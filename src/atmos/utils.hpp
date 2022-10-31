@@ -14,3 +14,5 @@ static inline int to_int(double val) {
 wchar_t get_wind_dir_icon(int deg);
 
 std::wstring_view get_weather_icon(int id);
+
+std::string_view get_aqi_name(int aqi);

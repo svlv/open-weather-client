@@ -53,3 +53,14 @@ forecast_data get_5_day_3_hour_forecast(double lat, double lon, std::string_view
 
   return deserialize<forecast_data>(client.read());
 }
+
+air_pollution_data get_air_pollution(double lat, double lon, std::string_view token)
+{
+  http_client client;
+  client.connect(HOST, PORT);
+
+  const std::string_view path = "/data/2.5/air_pollution";
+  client.write(make_request(path, token, lat, lon));
+
+  return deserialize<air_pollution_data>(client.read());
+}

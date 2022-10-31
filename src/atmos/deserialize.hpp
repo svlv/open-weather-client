@@ -168,3 +168,75 @@ forecast_data deserialize(const std::string& data)
 
   return deserialize<forecast_data>(pt);
 }
+
+template <>
+air_pollution_data::coord_t deserialize(const boost::property_tree::ptree& pt)
+{
+  return {
+    pt.get<double>("lon"),
+    pt.get<double>("lat")
+  };
+}
+
+template <>
+air_pollution_data::air_pollution_t::main_t deserialize(const boost::property_tree::ptree& pt)
+{
+  return {
+    pt.get<int>("aqi"),
+  };
+}
+
+template <>
+air_pollution_data::air_pollution_t::components_t deserialize(const boost::property_tree::ptree& pt)
+{
+  return {
+      pt.get<double>("co"),
+      pt.get<double>("no"),
+      pt.get<double>("no2"),
+      pt.get<double>("o3"),
+      pt.get<double>("so2"),
+      pt.get<double>("pm2_5"),
+      pt.get<double>("pm10"),
+      pt.get<double>("nh3")
+  };
+}
+
+template <>
+air_pollution_data::air_pollution_t deserialize(const boost::property_tree::ptree& pt)
+{
+  return {
+    pt.get<int>("dt"),
+    deserialize<air_pollution_data::air_pollution_t::main_t>(pt.get_child("main")),
+    deserialize<air_pollution_data::air_pollution_t::components_t>(pt.get_child("components")),
+  };
+}
+
+template <>
+std::vector<air_pollution_data::air_pollution_t> deserialize(const boost::property_tree::ptree& pt)
+{
+  std::vector<air_pollution_data::air_pollution_t> list;
+  for (const auto& air_pollution : pt) {
+    list.emplace_back(deserialize<air_pollution_data::air_pollution_t>(air_pollution.second));
+  }
+  return list;
+}
+
+template <>
+air_pollution_data deserialize(const boost::property_tree::ptree& pt)
+{
+  return {
+    deserialize<air_pollution_data::coord_t>(pt.get_child("coord")),
+    deserialize<std::vector<air_pollution_data::air_pollution_t>>(pt.get_child("list"))
+  };
+}
+
+template <>
+air_pollution_data deserialize(const std::string& data)
+{
+  std::stringstream ss(data);
+
+  boost::property_tree::ptree pt;
+  boost::property_tree::read_json(ss, pt);
+
+  return deserialize<air_pollution_data>(pt);
+}

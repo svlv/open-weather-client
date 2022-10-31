@@ -38,3 +38,18 @@ std::wstring_view get_weather_icon(int id)
     return L"☁️";
   return L"";
 }
+
+std::string_view get_aqi_name(int aqi)
+{
+  if (aqi == 1)
+    return "Good";
+  else if (aqi == 2)
+    return "Fair";
+  else if (aqi == 3)
+    return "Moderate";
+  else if (aqi == 4)
+    return "Poor";
+  else if (aqi == 5)
+    return "Very Poor";
+  return "Unknown";
+}
