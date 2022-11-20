@@ -3,240 +3,84 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include "data.hpp"
+#include "reflection.hpp"
 
-template <class T, class U> T deserialize(const U& data);
+using PropTreeConstRef = const boost::property_tree::ptree&;
 
-template <>
-wind_t deserialize(const boost::property_tree::ptree& pt)
+template <typename Owner>
+struct Setter;
+
+template <typename T>
+static
+typename std::enable_if<!IsReflectable<T>::value, void>::type
+deserializeMemberImpl(PropTreeConstRef pt, T& member, const char* name)
 {
-  const auto& gust = pt.get_optional<double>("gust");
-  return {
-    pt.get<double>("speed"),
-    pt.get<int>("deg"),
-    gust.has_value() ? gust.get() : std::optional<double>()
-  };
+    member = pt.get<T>(name);
 }
 
-template <>
-forecast_data::forecast_t::main_t deserialize(const boost::property_tree::ptree& pt)
+template <typename T>
+static
+typename std::enable_if<!IsReflectable<T>::value, void>::type
+deserializeMemberImpl(PropTreeConstRef pt, std::optional<T>& member, const char* name)
 {
-  return {
-      pt.get<double>("temp"),
-      pt.get<double>("feels_like"),
-      pt.get<double>("temp_min"),
-      pt.get<double>("temp_max"),
-      pt.get<int>("pressure"),
-      pt.get<int>("sea_level"),
-      pt.get<int>("grnd_level"),
-      pt.get<int>("humidity")
-  };
+    const auto& opt = pt.get_optional<T>(name);
+    member = opt.has_value() ? std::optional<T>(opt.get()) : std::optional<T>();
 }
 
-template <>
-weather_t deserialize(const boost::property_tree::ptree& pt)
+template <typename T>
+static
+typename std::enable_if<IsReflectable<T>::value, void>::type
+deserializeMemberImpl(PropTreeConstRef pt, std::vector<T>& member, const char* name)
 {
-  return {
-    pt.get<int>("id"),
-    pt.get<std::string>("main"),
-    pt.get<std::string>("description"),
-    pt.get<std::string>("icon")
-  };
+    for (const auto& elem : pt.get_child(name)) {
+        member.emplace_back(Setter<T>::deserialize(elem.second));
+    }
 }
 
-template <>
-std::vector<weather_t> deserialize(const boost::property_tree::ptree& pt)
+template <typename T>
+static
+typename std::enable_if<IsReflectable<T>::value, void>::type
+deserializeMemberImpl(PropTreeConstRef pt, T& member, const char* name)
 {
-  std::vector<weather_t> vec;
-  for (const auto& weather : pt) {
-    vec.emplace_back(deserialize<weather_t>(weather.second));
-  }
-  return vec;
+    member = Setter<T>::deserialize(pt.get_child(name));
 }
 
-template<>
-clouds_t deserialize(const boost::property_tree::ptree& pt)
+template <typename Owner>
+class Setter
 {
-  return {
-    pt.get<int>("all")
-  };
-}
+    template <unsigned int Line>
+    using MemberSetter = typename Owner::template MemberGetterForLine<Owner, Line>;
+    
+    using MemberLines = GenerateNumList<Owner::FirstLine+1, Owner::EndLine>;
 
-template <>
-forecast_data::forecast_t deserialize(const boost::property_tree::ptree& pt)
-{
-  return {
-    pt.get<int>("dt"),
-    pt.get<std::string>("dt_txt"),
-    deserialize<forecast_data::forecast_t::main_t>(pt.get_child("main")),
-    deserialize<std::vector<weather_t>>(pt.get_child("weather")),
-    deserialize<clouds_t>(pt.get_child("clouds")),
-    deserialize<wind_t>(pt.get_child("wind")),
-    pt.get<int>("visibility"),
-    pt.get<double>("pop")
-  };
-}
+    template <typename TypeListHead, typename... TypeListTail>
+    static void setImpl(Owner& owner, PropTreeConstRef pt, TypeList<TypeListHead, TypeListTail...>)
+    {
+        auto& member = MemberSetter<TypeListHead::value>::getMember(owner);
+        const char* name = MemberSetter<TypeListHead::value>::ReflectableMemberName;
+        deserializeMemberImpl(pt, member, name);
+        setImpl(owner, pt, TypeList<TypeListTail...>());
+    }
 
-template <>
-std::vector<forecast_data::forecast_t> deserialize(const boost::property_tree::ptree& pt)
-{
-  std::vector<forecast_data::forecast_t> list;
-  for (const auto& forecast : pt) {
-    list.emplace_back(deserialize<forecast_data::forecast_t>(forecast.second));
-  }
-  return list;
-}
+    static void setImpl(Owner& owner, PropTreeConstRef pt, TypeList<>)
+    {
+    }
+public:
+    static Owner deserialize(PropTreeConstRef pt)
+    {
+        Owner ret;
+        setImpl(ret, pt, MemberLines());
+        return ret;
+    }
+};
 
-template <>
-weather_data::coord_t deserialize(const boost::property_tree::ptree& pt)
-{
-  return {
-    pt.get<double>("lon"),
-    pt.get<double>("lat")
-  };
-}
-
-template <>
-weather_data::main_t deserialize(const boost::property_tree::ptree& pt)
-{
-  return {
-    pt.get<double>("temp"),
-    pt.get<double>("feels_like"),
-    pt.get<double>("temp_min"),
-    pt.get<double>("temp_max"),
-    pt.get<int>("pressure"),
-    pt.get<int>("humidity")
-  };
-}
-
-template <>
-weather_data::sys_t deserialize(const boost::property_tree::ptree& pt)
-{
-  return {
-    pt.get<std::string>("country"),
-    pt.get<int>("sunrise"),
-    pt.get<int>("sunset")
-  };
-}
-
-template <>
-weather_data deserialize(const boost::property_tree::ptree& pt)
-{
-  return {
-    deserialize<weather_data::coord_t>(pt.get_child("coord")),
-    deserialize<std::vector<weather_t>>(pt.get_child("weather")),
-    pt.get<std::string>("base"),
-    deserialize<weather_data::main_t>(pt.get_child("main")),
-    pt.get<int>("visibility"),
-    deserialize<wind_t>(pt.get_child("wind")),
-    deserialize<clouds_t>(pt.get_child("clouds")),
-    pt.get<int>("dt"),
-    deserialize<weather_data::sys_t>(pt.get_child("sys")),
-    pt.get<int>("timezone"),
-    pt.get<int>("id"),
-    pt.get<std::string>("name"),
-    pt.get<int>("cod")
-  };
-}
-
-template <>
-forecast_data deserialize(const boost::property_tree::ptree& pt)
-{
-  return {
-    pt.get<int>("cnt"),
-    deserialize<std::vector<forecast_data::forecast_t>>(pt.get_child("list"))
-  };
-}
-
-template <>
-weather_data deserialize(const std::string& data)
+template <typename T>
+T deserialize(const std::string& data)
 {
   std::stringstream ss(data);
 
   boost::property_tree::ptree pt;
   boost::property_tree::read_json(ss, pt);
 
-  return deserialize<weather_data>(pt);
-}
-
-template <>
-forecast_data deserialize(const std::string& data)
-{
-  std::stringstream ss(data);
-
-  boost::property_tree::ptree pt;
-  boost::property_tree::read_json(ss, pt);
-
-  return deserialize<forecast_data>(pt);
-}
-
-template <>
-air_pollution_data::coord_t deserialize(const boost::property_tree::ptree& pt)
-{
-  return {
-    pt.get<double>("lon"),
-    pt.get<double>("lat")
-  };
-}
-
-template <>
-air_pollution_data::air_pollution_t::main_t deserialize(const boost::property_tree::ptree& pt)
-{
-  return {
-    pt.get<int>("aqi"),
-  };
-}
-
-template <>
-air_pollution_data::air_pollution_t::components_t deserialize(const boost::property_tree::ptree& pt)
-{
-  return {
-      pt.get<double>("co"),
-      pt.get<double>("no"),
-      pt.get<double>("no2"),
-      pt.get<double>("o3"),
-      pt.get<double>("so2"),
-      pt.get<double>("pm2_5"),
-      pt.get<double>("pm10"),
-      pt.get<double>("nh3")
-  };
-}
-
-template <>
-air_pollution_data::air_pollution_t deserialize(const boost::property_tree::ptree& pt)
-{
-  return {
-    pt.get<int>("dt"),
-    deserialize<air_pollution_data::air_pollution_t::main_t>(pt.get_child("main")),
-    deserialize<air_pollution_data::air_pollution_t::components_t>(pt.get_child("components")),
-  };
-}
-
-template <>
-std::vector<air_pollution_data::air_pollution_t> deserialize(const boost::property_tree::ptree& pt)
-{
-  std::vector<air_pollution_data::air_pollution_t> list;
-  for (const auto& air_pollution : pt) {
-    list.emplace_back(deserialize<air_pollution_data::air_pollution_t>(air_pollution.second));
-  }
-  return list;
-}
-
-template <>
-air_pollution_data deserialize(const boost::property_tree::ptree& pt)
-{
-  return {
-    deserialize<air_pollution_data::coord_t>(pt.get_child("coord")),
-    deserialize<std::vector<air_pollution_data::air_pollution_t>>(pt.get_child("list"))
-  };
-}
-
-template <>
-air_pollution_data deserialize(const std::string& data)
-{
-  std::stringstream ss(data);
-
-  boost::property_tree::ptree pt;
-  boost::property_tree::read_json(ss, pt);
-
-  return deserialize<air_pollution_data>(pt);
+  return Setter<T>::deserialize(pt);
 }

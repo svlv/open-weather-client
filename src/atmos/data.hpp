@@ -4,61 +4,77 @@
 #include <string>
 #include <vector>
 
+#include "reflection.hpp"
+
 struct weather_t
 {
-  int id;
-  std::string main;
-  std::string description;
-  std::string icon;
+  START_REFLECTABLE_MEMBERS();
+  REFLECTABLE_MEMBER(int, id);
+  REFLECTABLE_MEMBER(std::string, main);
+  REFLECTABLE_MEMBER(std::string, description);
+  REFLECTABLE_MEMBER(std::string, icon);
+  END_REFLECTABLE_MEMBERS();
 };
 
 struct clouds_t
 {
-  int all;
+  START_REFLECTABLE_MEMBERS();
+  REFLECTABLE_MEMBER(int, all);
+  END_REFLECTABLE_MEMBERS();
 };
 
 struct wind_t
 {
-  double speed;
-  int deg;
-  std::optional<double> gust;
+  START_REFLECTABLE_MEMBERS();
+  REFLECTABLE_MEMBER(double, speed);
+  REFLECTABLE_MEMBER(int, deg);
+  REFLECTABLE_MEMBER(std::optional<double>, gust);
+  END_REFLECTABLE_MEMBERS();
+};
+
+struct coord_t {
+  START_REFLECTABLE_MEMBERS();
+  REFLECTABLE_MEMBER(double, lon);
+  REFLECTABLE_MEMBER(double, lat);
+  END_REFLECTABLE_MEMBERS();
 };
 
 struct weather_data
 {
-  struct coord_t {
-    double lon;
-    double lat;
-  };
-
   struct main_t {
-    double temp;
-    double feels_like;
-    double temp_min;
-    double temp_max;
-    int pressure;
-    int humidity;
+    START_REFLECTABLE_MEMBERS();
+    REFLECTABLE_MEMBER(double, temp);
+    REFLECTABLE_MEMBER(double, feels_like);
+    REFLECTABLE_MEMBER(double, temp_min);
+    REFLECTABLE_MEMBER(double, temp_max);
+    REFLECTABLE_MEMBER(int, pressure);
+    REFLECTABLE_MEMBER(int, humidity);
+    END_REFLECTABLE_MEMBERS();
   };
 
   struct sys_t {
-    std::string country;
-    int sunrise;
-    int sunset;
+    START_REFLECTABLE_MEMBERS();
+    REFLECTABLE_MEMBER(std::string, country);
+    REFLECTABLE_MEMBER(int, sunrise);
+    REFLECTABLE_MEMBER(int, sunset);
+    END_REFLECTABLE_MEMBERS();
   };
 
-  coord_t coord;
-  std::vector<weather_t> weather;
-  std::string base;
-  main_t main;
-  int visibility;
-  wind_t wind;
-  clouds_t clouds;
-  int dt;
-  sys_t sys;
-  int timezone;
-  int id;
-  std::string name;
-  int cod;
+  START_REFLECTABLE_MEMBERS();
+  REFLECTABLE_MEMBER(coord_t, coord);
+  REFLECTABLE_MEMBER(std::vector<weather_t>, weather);
+  REFLECTABLE_MEMBER(std::string, base);
+  REFLECTABLE_MEMBER(main_t, main);
+  REFLECTABLE_MEMBER(int, visibility);
+  REFLECTABLE_MEMBER(wind_t, wind);
+  REFLECTABLE_MEMBER(clouds_t, clouds);
+  REFLECTABLE_MEMBER(int, dt);
+  REFLECTABLE_MEMBER(sys_t, sys);
+  REFLECTABLE_MEMBER(int, timezone);
+  REFLECTABLE_MEMBER(int, id);
+  REFLECTABLE_MEMBER(std::string, name);
+  REFLECTABLE_MEMBER(int, cod);
+  END_REFLECTABLE_MEMBERS();
 };
 
 struct forecast_data
@@ -66,59 +82,67 @@ struct forecast_data
   struct forecast_t
   {
     struct main_t {
-      double temp;
-      double feels_like;
-      double temp_min;
-      double temp_max;
-      int pressure;
-      int sea_level;
-      int grnd_level;
-      int humidity;
+      START_REFLECTABLE_MEMBERS();
+      REFLECTABLE_MEMBER(double, temp);
+      REFLECTABLE_MEMBER(double, feels_like);
+      REFLECTABLE_MEMBER(double, temp_min);
+      REFLECTABLE_MEMBER(double, temp_max);
+      REFLECTABLE_MEMBER(int, pressure);
+      REFLECTABLE_MEMBER(int, sea_level);
+      REFLECTABLE_MEMBER(int, grnd_level);
+      REFLECTABLE_MEMBER(int, humidity);
+      END_REFLECTABLE_MEMBERS();
     };
 
-    int dt;
-    std::string dt_txt;
-    main_t main;
-    std::vector<weather_t> weather;
-    clouds_t clouds;
-    wind_t wind;
-    int visibility;
-    double pop;
+    START_REFLECTABLE_MEMBERS();
+    REFLECTABLE_MEMBER(int, dt);
+    REFLECTABLE_MEMBER(std::string, dt_txt);
+    REFLECTABLE_MEMBER(main_t, main);
+    REFLECTABLE_MEMBER(std::vector<weather_t>, weather);
+    REFLECTABLE_MEMBER(clouds_t, clouds);
+    REFLECTABLE_MEMBER(wind_t, wind);
+    REFLECTABLE_MEMBER(int, visibility);
+    REFLECTABLE_MEMBER(double, pop);
+    END_REFLECTABLE_MEMBERS();
   };
 
-  int cnt; // A number of timestamps
-  std::vector<forecast_t> list;
+  START_REFLECTABLE_MEMBERS();
+  REFLECTABLE_MEMBER(int, cnt); // A number of timestamps
+  REFLECTABLE_MEMBER(std::vector<forecast_t>, list);
+  END_REFLECTABLE_MEMBERS();
 };
 
 struct air_pollution_data
 {
-  struct coord_t {
-    double lon;
-    double lat;
-  };
-
   struct air_pollution_t {
-
     struct main_t {
-      int aqi;
+      START_REFLECTABLE_MEMBERS();
+      REFLECTABLE_MEMBER(int, aqi);
+      END_REFLECTABLE_MEMBERS();
     };
 
     struct components_t {
-      double co;
-      double no;
-      double no2;
-      double o3;
-      double so2;
-      double pm2_5;
-      double pm10;
-      double nh3;
+      START_REFLECTABLE_MEMBERS();
+      REFLECTABLE_MEMBER(double, co);
+      REFLECTABLE_MEMBER(double, no);
+      REFLECTABLE_MEMBER(double, no2);
+      REFLECTABLE_MEMBER(double, o3);
+      REFLECTABLE_MEMBER(double, so2);
+      REFLECTABLE_MEMBER(double, pm2_5);
+      REFLECTABLE_MEMBER(double, pm10);
+      REFLECTABLE_MEMBER(double, nh3);
+      END_REFLECTABLE_MEMBERS();
     };
 
-    int dt;
-    main_t main;
-    components_t components;
+    START_REFLECTABLE_MEMBERS();
+    REFLECTABLE_MEMBER(main_t, main);
+    REFLECTABLE_MEMBER(components_t, components);
+    REFLECTABLE_MEMBER(int, dt);
+    END_REFLECTABLE_MEMBERS();
   };
 
-  coord_t coord;
-  std::vector<air_pollution_t> list;
+  START_REFLECTABLE_MEMBERS();
+  REFLECTABLE_MEMBER(coord_t, coord);
+  REFLECTABLE_MEMBER(std::vector<air_pollution_t>, list);
+  END_REFLECTABLE_MEMBERS();
 };

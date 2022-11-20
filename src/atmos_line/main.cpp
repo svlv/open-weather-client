@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
 
         if (day == -1) {
           int hour = 2;
-          while (hour != timeinfo->tm_hour) {
+          while (hour < timeinfo->tm_hour) {
             sprintf(lines[i++], "%-21s", " ");
             hour += 3;
           }
