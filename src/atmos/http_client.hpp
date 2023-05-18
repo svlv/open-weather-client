@@ -1,18 +1,16 @@
 #pragma once
 
-#include <boost/beast/core.hpp>
-#include <boost/beast/http.hpp>
-
-namespace http = boost::beast::http;
+#include <string_view>
+#include <string>
 
 class http_client
 {
   public:
     http_client();
-    void connect(std::string_view host, std::string_view port);
-    void write(const http::request<http::string_body>& req);
+    ~http_client();
+    bool connect(std::string_view host, std::string_view port);
+    void write(std::string_view request);
     std::string read();
   private:
-    boost::asio::io_context _ioc;
-    boost::beast::tcp_stream _stream;
+    int m_sock;
 };

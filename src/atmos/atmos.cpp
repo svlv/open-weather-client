@@ -1,17 +1,17 @@
 #include "atmos.hpp"
-#include "http_client.hpp"
 #include "deserialize.hpp"
+#include "http_client.hpp"
 #include "query_string.hpp"
 
-#include <cstdio>
 #include <boost/beast/version.hpp>
+#include <cstdio>
 
 constexpr std::string_view HOST = "api.openweathermap.org";
 constexpr std::string_view PORT = "80";
 
 namespace
 {
-http::request<http::string_body> make_request(std::string_view path, std::string_view token, double lat, double lon)
+std::string make_request(std::string_view path, std::string_view token, double lat, double lon)
 {
   char lat_str[16];
   sprintf(lat_str, "%.4f", lat);
@@ -21,14 +21,12 @@ http::request<http::string_body> make_request(std::string_view path, std::string
 
   query_string queries("lat", lat_str, "lon", lon_str, "appid", token);
 
-  char full_path[256];
-  sprintf(full_path, "%s?%s", path.data(), queries.to_string().c_str());
+  std::string request(256, '\0');
+  int sz = sprintf(request.data(), "GET %s?%s HTTP/1.0\r\n\r\n", path.data(),
+                   queries.to_string().c_str());
+  request.resize(sz);
 
-  http::request<http::string_body> req{http::verb::get, full_path, 10};
-  req.set(boost::beast::http::field::host, HOST);
-  req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
-
-  return req;
+  return request;
 }
 } // namespace
 

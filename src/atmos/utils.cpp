@@ -20,11 +20,10 @@ wchar_t get_wind_dir_icon(int deg) {
   return L'↓';
 }
 
-std::wstring_view get_weather_icon(int id)
-{
+std::wstring_view get_weather_icon(int id) {
   if (id >= 200 && id <= 232)
     return L"🌩";
-  else if (id >=300 && id <= 321)
+  else if (id >= 300 && id <= 321)
     return L"🌧";
   else if (id >= 500 && id <= 531)
     return L"🌧";
@@ -39,8 +38,7 @@ std::wstring_view get_weather_icon(int id)
   return L"";
 }
 
-std::string_view get_aqi_name(int aqi)
-{
+std::string_view get_aqi_name(int aqi) {
   if (aqi == 1)
     return "Good";
   else if (aqi == 2)
